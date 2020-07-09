@@ -1,0 +1,16 @@
+*.pyc
+build/
+.idea/
+cmake-build-debug/
+cmake-build-release/
+cmake-build-relwithdebinfo/
+cmake-build-minsizerel/
+build_release/
+*/CMakeFiles/
+*/generated/
+data/
+log/
+node_modules/
+package-lock.json
+*/_book/
+config/*
