@@ -198,6 +198,7 @@ public:
 
     void findStartEndAngle(){
         // start and end orientation of this cloud
+        // 由于velodyne 激光器的点火顺序是顺时针，取了负号,更加符合点火顺序
         segMsg.startOrientation = -atan2(laserCloudIn->points[0].y, laserCloudIn->points[0].x);
         segMsg.endOrientation   = -atan2(laserCloudIn->points[laserCloudIn->points.size() - 1].y,
                                                      laserCloudIn->points[laserCloudIn->points.size() - 1].x) + 2 * M_PI;
@@ -264,8 +265,8 @@ public:
         // -1, no valid info to check if ground of not
         //  0, initial value, after validation, means not ground
         //  1, ground
-        for (size_t j = 0; j < Horizon_SCAN; ++j){
-            for (size_t i = 0; i < groundScanInd; ++i){
+        for (size_t j = 0; j < Horizon_SCAN; ++j){ // Horizon_SCAN: 1800
+            for (size_t i = 0; i < groundScanInd; ++i){ // groundScanInd: 7
 
                 lowerInd = j + ( i )*Horizon_SCAN;
                 upperInd = j + (i+1)*Horizon_SCAN;
@@ -282,7 +283,7 @@ public:
                 diffZ = fullCloud->points[upperInd].z - fullCloud->points[lowerInd].z;
 
                 angle = atan2(diffZ, sqrt(diffX*diffX + diffY*diffY) ) * 180 / M_PI;
-
+                // sensorMountAngle: 0.0,地面点的简单判别，通过查询相邻环上的两个点俯仰角是否超过10度来判定。
                 if (abs(angle - sensorMountAngle) <= 10){
                     groundMat.at<int8_t>(i,j) = 1;
                     groundMat.at<int8_t>(i+1,j) = 1;
@@ -326,7 +327,7 @@ public:
                 if (labelMat.at<int>(i,j) > 0 || groundMat.at<int8_t>(i,j) == 1){
                     // outliers that will not be used for optimization (always continue)
                     if (labelMat.at<int>(i,j) == 999999){
-                        if (i > groundScanInd && j % 5 == 0){
+                        if (i > groundScanInd && j % 5 == 0){ // groundScanInd: 7
                             outlierCloud->push_back(fullCloud->points[j + i*Horizon_SCAN]);
                             continue;
                         }else{
